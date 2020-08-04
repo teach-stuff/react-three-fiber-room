@@ -3,7 +3,6 @@ import { Canvas, useFrame, useThree } from "react-three-fiber";
 
 import "./App.css";
 
-const result;
 const crossVectors = function (a, b) {
   const ax = a.x,
     ay = a.y,
@@ -11,8 +10,9 @@ const crossVectors = function (a, b) {
   const bx = b.x,
     by = b.y,
     bz = b.z;
+  
+  const result;
 
-    
     result.x = ay * bz - az * by;
     result.y = az * bx - ax * bz;
     result.z = ax * by - ay * bx;
@@ -20,12 +20,12 @@ const crossVectors = function (a, b) {
   return result;
 };
 const subtractVectors = function ( a, b ) {
+  const result;
+  result.x = a.x - b.x;
+  result.y = a.y - b.y;
+  result.z = a.z - b.z;
 
-  this.x = a.x - b.x;
-  this.y = a.y - b.y;
-  this.z = a.z - b.z;
-
-  return this;
+  return result;
 
 }
 const lookAt = ({ eye, target, up }) => {
