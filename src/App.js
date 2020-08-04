@@ -1,8 +1,45 @@
-import React, { useRef, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from 'react-three-fiber';
+import React, { useRef, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "react-three-fiber";
 
-import './App.css';
-import { PerspectiveCamera } from 'three';
+import "./App.css";
+
+const result;
+const crossVectors = function (a, b) {
+  const ax = a.x,
+    ay = a.y,
+    az = a.z;
+  const bx = b.x,
+    by = b.y,
+    bz = b.z;
+
+    
+    result.x = ay * bz - az * by;
+    result.y = az * bx - ax * bz;
+    result.z = ax * by - ay * bx;
+
+  return result;
+};
+const subtractVectors = function ( a, b ) {
+
+  this.x = a.x - b.x;
+  this.y = a.y - b.y;
+  this.z = a.z - b.z;
+
+  return this;
+
+}
+const lookAt = ({ eye, target, up }) => {
+  const n = new Vector3();
+  const u = new Vector3();
+  const v = new Vector3();
+
+  n = subtractVectors(target,eye);
+  u = up;
+  v = crossVectors(n, u);
+  u = crossVectors(u, n);
+
+
+};
 
 const SpinningMesh = ({ position, args }) => {
   const mesh = useRef();
@@ -46,13 +83,10 @@ const Camera = () => {
       />
       <perspectiveCamera
         ref={cameraLeftRef}
-        {...{
-          position: [5, 5, 75],
-          fov: 70,
-          viewport: vectorLeftRef.current,
-        }}
+        position={[0, 10, 25]}
+        up={[5, -5, 0]}
+        viewport={vectorLeftRef.current}
       />
-
       <vector4
         ref={vectorRightRef}
         x={window.innerWidth / 2}
@@ -63,7 +97,7 @@ const Camera = () => {
       <perspectiveCamera
         ref={cameraRightRef}
         {...{
-          position: [15, 5, 75],
+          position: [0, 10, 75],
           fov: 70,
           viewport: vectorRightRef.current,
         }}
@@ -81,11 +115,7 @@ const Camera = () => {
 const App = () => {
   return (
     <>
-      <Canvas
-        colorManagement
-        shadowMap
-        // camera={{ position: [5, 5, 75], fov: 70 }}
-      >
+      <Canvas colorManagement shadowMap>
         <Camera />
         <pointLight position={[-10, 0, -20]} intensity={0.5} />
         <pointLight position={[0, -10, 0]} intensity={1.5} />
@@ -95,11 +125,11 @@ const App = () => {
           receiveShadow
         >
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={'red'} />
+          <meshStandardMaterial attach="material" color={"red"} />
         </mesh>
         <mesh position={[1, 12, -5]} receiveShadow>
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={'red'} />
+          <meshStandardMaterial attach="material" color={"red"} />
         </mesh>
         <mesh
           rotation={[Math.PI / 2, 0, 0]}
@@ -107,7 +137,7 @@ const App = () => {
           receiveShadow
         >
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={'red'} />
+          <meshStandardMaterial attach="material" color={"red"} />
         </mesh>
         <mesh
           rotation={[0, Math.PI / 2, 0]}
@@ -115,7 +145,7 @@ const App = () => {
           receiveShadow
         >
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={'red'} />
+          <meshStandardMaterial attach="material" color={"red"} />
         </mesh>
         <mesh
           rotation={[0, -Math.PI / 2, 0]}
@@ -123,10 +153,11 @@ const App = () => {
           receiveShadow
         >
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={'red'} />
+          <meshStandardMaterial attach="material" color={"red"} />
         </mesh>
 
         <SpinningMesh position={[0, 0, 50]} args={[6, 6, 6]} />
+        <meshStandardMaterial attach="material" color={"blue"} />
       </Canvas>
     </>
   );
