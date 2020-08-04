@@ -28,6 +28,15 @@ const subtractVectors = function ( a, b ) {
   return result;
 
 }
+function normalize(point) {
+  var norm = Math.sqrt(point.x * point.x + point.y * point.y+ point.z * point.z);
+  if (norm != 0) { 
+    point.x =  point.x / norm;
+    point.y =  point.y / norm;
+    point.z =  point.z / norm;
+  }
+  return point;
+}
 const lookAt = ({ eye, target, up }) => {
   const n = new Vector3();
   const u = new Vector3();
@@ -37,6 +46,12 @@ const lookAt = ({ eye, target, up }) => {
   u = up;
   v = crossVectors(n, u);
   u = crossVectors(u, n);
+
+  n =normalize(n);
+  v =normalize(v);
+  u =normalize(u);
+
+
 
 
 };
