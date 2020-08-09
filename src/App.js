@@ -2,64 +2,99 @@ import React, { useRef, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "react-three-fiber";
 
 import "./App.css";
+import { Vector3 } from "three";
 
-const crossVectors = function (a, b) {
-  const ax = a.x,
-    ay = a.y,
-    az = a.z;
-  const bx = b.x,
-    by = b.y,
-    bz = b.z;
-  
-  const result;
+var crossVectors = function (a, b) {
+  var result = { Vector3 };
 
-    result.x = ay * bz - az * by;
-    result.y = az * bx - ax * bz;
-    result.z = ax * by - ay * bx;
+  result.x = a.y * b.z - a.z * b.y;
+  result.y = a.z * b.x - a.x * b.z;
+  result.z = a.x * b.y - a.y * b.x;
 
   return result;
 };
-const subtractVectors = function ( a, b ) {
-  const result;
+var subtractVectors = function (a, b) {
+  var result = { Vector3 };
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   result.z = a.z - b.z;
 
   return result;
-
-}
+};
 function normalize(point) {
-  var norm = Math.sqrt(point.x * point.x + point.y * point.y+ point.z * point.z);
-  if (norm != 0) { 
-    point.x =  point.x / norm;
-    point.y =  point.y / norm;
-    point.z =  point.z / norm;
+  var norm = Math.sqrt(
+    point.x * point.x + point.y * point.y + point.z * point.z
+  );
+  if (norm != 0) {
+    point.x = point.x / norm;
+    point.y = point.y / norm;
+    point.z = point.z / norm;
   }
+  //console.log(point);
+
   return point;
 }
-const lookAt = ({ eye, target, up }) => {
-  const n = new Vector3();
-  const u = new Vector3();
-  const v = new Vector3();
 
-  n = subtractVectors(target,eye);
-  u = up;
-  v = crossVectors(n, u);
-  u = crossVectors(u, n);
+function lookAt(eye, target, up) {
+  var _x = { Vector3 };
+  var _y = { Vector3 };
+  var _z = { Vector3 };
 
-  n =normalize(n);
-  v =normalize(v);
-  u =normalize(u);
+  _z = subtractVectors(eye, target);
 
+  _x = crossVectors(up, _z);
+  _y = crossVectors(_z, _x);
 
+  _z = normalize(_z);
+  _x = normalize(_x);
+  _y = normalize(_y);
 
+  // console.log(_x, _y, _z);
+  return [
+    _x.x,
 
-};
+    _y.x,
+    _z.x,
+    eye.x,
+    _x.y,
+    _y.y,
+    _z.y,
+    eye.y,
+    _x.z,
+    _y.z,
+    _z.z,
+    eye.z,
+    0,
+    0,
+    0,
+    1,
+  ];
+}
+
+var pos;
 
 const SpinningMesh = ({ position, args }) => {
   const mesh = useRef();
 
-  useFrame(() => (mesh.current.position.z -= 0.05));
+  useFrame(() => {
+    // // window.addEventListener("keydown", onDocumentKeyDown, false);
+
+    // // function onDocumentKeyDown(event) {
+    // //   var keyCode = event.which;
+    // //   var r = 10;
+    // //   if (keyCode == 87) {
+    // //     mesh.current.position.z -= 0.01;
+    // //     pos = mesh.current.position.z;
+    // //     console.log(pos);
+    // //   } else if (keyCode == 83) {
+    // //     mesh.current.position.z += 0.01;
+    // //     pos = mesh.current.position.z;
+    // //     console.log(pos);
+    // //   }
+    // }
+    mesh.current.position.z -= 0.05;
+    pos = mesh.current.position.z;
+  });
 
   return (
     <mesh position={position} ref={mesh}>
@@ -80,11 +115,45 @@ const Camera = () => {
   // Make the camera known to the system
   useEffect(() => void setDefaultCamera(camera.current), []);
   // Update it every frame
+
   useFrame(() => {
-    cameraLeftRef.current.updateMatrixWorld();
-    cameraRightRef.current.updateMatrixWorld();
-    camera.current.updateMatrixWorld();
-    camera.current.updateProjectionMatrix();
+    // cameraLeftRef.current.updateMatrixWorld();
+    // cameraRightRef.current.updateMatrixWorld();
+    // camera.current.updateMatrixWorld();
+    // camera.current.updateProjectionMatrix();
+    //console.log(pos);
+
+    var lookAtMatrix = lookAt(
+      new Vector3(50, 50, 75),
+      new Vector3(0, 10, pos),
+      new Vector3(0, 1, 0)
+    );
+
+    //var pos = 70;
+
+    console.log(lookAtMatrix[1]);
+    cameraLeftRef.current.matrixAutoUpdate = false;
+
+    cameraLeftRef.current.matrix.set(
+      lookAtMatrix[0],
+      lookAtMatrix[1],
+      lookAtMatrix[2],
+      lookAtMatrix[3],
+      lookAtMatrix[4],
+      lookAtMatrix[5],
+      lookAtMatrix[6],
+      lookAtMatrix[7],
+      lookAtMatrix[8],
+      lookAtMatrix[9],
+      lookAtMatrix[10],
+      lookAtMatrix[11],
+      lookAtMatrix[12],
+      lookAtMatrix[13],
+      lookAtMatrix[14],
+      lookAtMatrix[15]
+    );
+
+    cameraLeftRef.current.updateMatrixWorld(true);
   });
 
   return (
@@ -98,8 +167,7 @@ const Camera = () => {
       />
       <perspectiveCamera
         ref={cameraLeftRef}
-        position={[0, 10, 25]}
-        up={[5, -5, 0]}
+        //position={[0, 10, 75]}
         viewport={vectorLeftRef.current}
       />
       <vector4
@@ -132,6 +200,7 @@ const App = () => {
     <>
       <Canvas colorManagement shadowMap>
         <Camera />
+
         <pointLight position={[-10, 0, -20]} intensity={0.5} />
         <pointLight position={[0, -10, 0]} intensity={1.5} />
         <mesh
