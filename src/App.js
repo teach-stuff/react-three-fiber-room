@@ -49,7 +49,7 @@ function lookAt(eye, target, up) {
   _x = normalize(_x);
   _y = normalize(_y);
 
-  // console.log(_x, _y, _z);
+  // todo pass array directly
   return [
     _x.x,
 
@@ -92,6 +92,8 @@ const SpinningMesh = ({ position, args }) => {
     // //     console.log(pos);
     // //   }
     // }
+
+    //todo mesh position
     mesh.current.position.z -= 0.05;
     pos = mesh.current.position.z;
   });
