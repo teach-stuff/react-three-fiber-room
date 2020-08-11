@@ -1,8 +1,9 @@
-import React, { useRef, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "react-three-fiber";
+import React, { useState, useRef, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from 'react-three-fiber';
+import useAnimationFrame from 'use-animation-frame';
 
-import "./App.css";
-import { Vector3 } from "three";
+import './App.css';
+import { Vector3 } from 'three';
 
 var crossVectors = function (a, b) {
   var result = { Vector3 };
@@ -23,7 +24,7 @@ var subtractVectors = function (a, b) {
 };
 function normalize(point) {
   var norm = Math.sqrt(
-    point.x * point.x + point.y * point.y + point.z * point.z
+    point.x * point.x + point.y * point.y + point.z * point.z,
   );
   if (norm != 0) {
     point.x = point.x / norm;
@@ -71,32 +72,8 @@ function lookAt(eye, target, up) {
   ];
 }
 
-var pos;
-
 const SpinningMesh = ({ position, args }) => {
   const mesh = useRef();
-
-  useFrame(() => {
-    // // window.addEventListener("keydown", onDocumentKeyDown, false);
-
-    // // function onDocumentKeyDown(event) {
-    // //   var keyCode = event.which;
-    // //   var r = 10;
-    // //   if (keyCode == 87) {
-    // //     mesh.current.position.z -= 0.01;
-    // //     pos = mesh.current.position.z;
-    // //     console.log(pos);
-    // //   } else if (keyCode == 83) {
-    // //     mesh.current.position.z += 0.01;
-    // //     pos = mesh.current.position.z;
-    // //     console.log(pos);
-    // //   }
-    // }
-
-    //todo mesh position
-    mesh.current.position.z -= 0.05;
-    pos = mesh.current.position.z;
-  });
 
   return (
     <mesh position={position} ref={mesh}>
@@ -105,13 +82,15 @@ const SpinningMesh = ({ position, args }) => {
   );
 };
 
-const Camera = () => {
+const Camera = ({ cubePosition }) => {
   const vectorLeftRef = useRef();
   const cameraLeftRef = useRef();
   const vectorRightRef = useRef();
   const cameraRightRef = useRef();
 
   const camera = useRef();
+
+  const pos = cubePosition[2];
 
   const { setDefaultCamera } = useThree();
   // Make the camera known to the system
@@ -128,7 +107,7 @@ const Camera = () => {
     var lookAtMatrix = lookAt(
       new Vector3(50, 50, 75),
       new Vector3(0, 10, pos),
-      new Vector3(0, 1, 0)
+      new Vector3(0, 1, 0),
     );
 
     //var pos = 70;
@@ -152,7 +131,7 @@ const Camera = () => {
       lookAtMatrix[12],
       lookAtMatrix[13],
       lookAtMatrix[14],
-      lookAtMatrix[15]
+      lookAtMatrix[15],
     );
 
     cameraLeftRef.current.updateMatrixWorld(true);
@@ -197,11 +176,30 @@ const Camera = () => {
   );
 };
 
+const CameraAndCube = () => {
+  const [position, setPosition] = useState([0, 0, 50]);
+  const requestRef = useRef();
+
+  useAnimationFrame(
+    (e) => {
+      setPosition([position[0], position[1], position[2] - 0.05]);
+    },
+    [position],
+  );
+
+  return (
+    <>
+      <Camera cubePosition={position} />
+      <SpinningMesh position={position} args={[6, 6, 6]} />
+    </>
+  );
+};
+
 const App = () => {
   return (
     <>
       <Canvas colorManagement shadowMap>
-        <Camera />
+        <CameraAndCube />
 
         <pointLight position={[-10, 0, -20]} intensity={0.5} />
         <pointLight position={[0, -10, 0]} intensity={1.5} />
@@ -211,11 +209,11 @@ const App = () => {
           receiveShadow
         >
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={"red"} />
+          <meshStandardMaterial attach="material" color={'red'} />
         </mesh>
         <mesh position={[1, 12, -5]} receiveShadow>
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={"red"} />
+          <meshStandardMaterial attach="material" color={'red'} />
         </mesh>
         <mesh
           rotation={[Math.PI / 2, 0, 0]}
@@ -223,7 +221,7 @@ const App = () => {
           receiveShadow
         >
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={"red"} />
+          <meshStandardMaterial attach="material" color={'red'} />
         </mesh>
         <mesh
           rotation={[0, Math.PI / 2, 0]}
@@ -231,7 +229,7 @@ const App = () => {
           receiveShadow
         >
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={"red"} />
+          <meshStandardMaterial attach="material" color={'red'} />
         </mesh>
         <mesh
           rotation={[0, -Math.PI / 2, 0]}
@@ -239,11 +237,10 @@ const App = () => {
           receiveShadow
         >
           <planeBufferGeometry attach="geometry" args={[30, 30]} />
-          <meshStandardMaterial attach="material" color={"red"} />
+          <meshStandardMaterial attach="material" color={'red'} />
         </mesh>
 
-        <SpinningMesh position={[0, 0, 50]} args={[6, 6, 6]} />
-        <meshStandardMaterial attach="material" color={"blue"} />
+        <meshStandardMaterial attach="material" color={'blue'} />
       </Canvas>
     </>
   );
